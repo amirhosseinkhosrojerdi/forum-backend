@@ -5,20 +5,39 @@ namespace Tests\Unit\API\V01\Auth;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Models\User;
+use Symfony\Component\HttpFoundation\Response;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class AuthControllerTest extends TestCase
 {
     use RefreshDatabase;
 
     /**
-     * Test that the registration endpoint validates input.
+     * Set up a roles and permissions for testing.
      *
      * @return void
      */
-    public function test_register_should_be_validate()
+    public function registerRolesAndPermissions(): void
+    {
+        foreach (config('permission.default_roles') as $key => $roleName) {
+            Role::firstOrCreate(['name' => $roleName]);
+        }
+
+        foreach (config('permission.default_permissions') as $key => $permissionName) {
+            Permission::firstOrCreate(['name' => $permissionName]);
+        }
+    }
+
+    /**
+     * Test that the registration endpoint validated.
+     *
+     * @return void
+     */
+    public function test_register_should_be_validated()
     {
         $response = $this->postJson(route('auth.register'));
-        $response->assertStatus(422);
+        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
     /**
@@ -28,23 +47,24 @@ class AuthControllerTest extends TestCase
      */
     public function test_new_user_can_register()
     {
+        $this->registerRolesAndPermissions();
         $response = $this->postJson(route('auth.register'), [
             "name" => "Amirhossein",
             "email" => "info@gmail.com",
             "password" => "123456"
         ]);
-        $response->assertStatus(201);
+        $response->assertStatus(Response::HTTP_CREATED);
     }
 
     /**
-     * Test that the login endpoint validates input.
+     * Test that the login endpoint validated.
      *
      * @return void
      */
-    public function test_login_should_be_validate()
+    public function test_login_should_be_validated()
     {
         $response = $this->postJson(route('auth.login'));
-        $response->assertStatus(422);   
+        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);   
     }
 
     /**
@@ -59,7 +79,7 @@ class AuthControllerTest extends TestCase
             'email' => $user->email,
             'password' => 'password' // Assuming the factory sets a default password
         ]);
-        $response->assertStatus(200);
+        $response->assertStatus(Response::HTTP_OK);
     }
     
     /**
@@ -72,7 +92,7 @@ class AuthControllerTest extends TestCase
         /** @var \App\Models\User $user */
         $user = User::factory()->create();
         $response = $this->actingAs($user)->get(route('auth.user'));
-        $response->assertStatus(200);
+        $response->assertStatus(Response::HTTP_OK);
     }
 
     /**
@@ -85,6 +105,6 @@ class AuthControllerTest extends TestCase
         /** @var \App\Models\User $user */
         $user = User::factory()->create();
         $response = $this->actingAs($user)->postJson(route('auth.logout'));
-        $response->assertStatus(200);
+        $response->assertStatus(Response::HTTP_OK);
     }
 }

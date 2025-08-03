@@ -9,11 +9,12 @@ use Illuminate\Support\Facades\Hash;
 class UserRepository
 {
     /**
-     * @param \Illuminate\Http\Request $request
+     * @param Request $request
+     * @return User
      */
     public function create(Request $request)
     {
-        User::create([
+        return User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),

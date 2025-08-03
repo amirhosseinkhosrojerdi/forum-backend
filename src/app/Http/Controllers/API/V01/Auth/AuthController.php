@@ -8,16 +8,17 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends Controller
 {
     /**
      * Register New User
      * @method Post
-     * @param \Illuminate\Http\Request $request
-     * @return void
+     * @param Request $request
+     * @return JsonResponse
      */
-    public function register(Request $request): JsonResponse
+    public function register(Request $request)
     {
         // Validate From Inputs
         $request->validate([
@@ -27,21 +28,28 @@ class AuthController extends Controller
         ]);
 
         // Insert User Into Database
-        resolve(UserRepository::class)->create($request);
-
+        $user = resolve(UserRepository::class)->create($request);
+        
+        // Assign Role Based on Email
+        // If the email matches the default super admin email, assign 'Super Admin' role,
+        // otherwise assign 'User' role.
+        // This logic is based on the configuration setting for the default super admin email.
+        $defaultSuperAdminEmail = config('permission.default_super_admine_email');
+        $user->email === $defaultSuperAdminEmail ? $user->assignRole('Super Admin') : $user->assignRole('User');
+        
         return response()->json([
             'message' => 'User created successfully'
-        ], 201);
+        ], Response::HTTP_CREATED);
     }
 
     /**
      * Login User
      * @method Post
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param Request $request
+     * @return JsonResponse
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function login(Request $request): JsonResponse
+    public function login(Request $request)
     {
         // Validate From Inputs
         $request->validate([
@@ -51,7 +59,7 @@ class AuthController extends Controller
 
         // Check User Credentials
         if(Auth::attempt($request->only('email', 'password'))) {
-            return response()->json([Auth::user(), 200]);
+            return response()->json([Auth::user(), Response::HTTP_OK]);
         }
 
         throw ValidationException::withMessages([
@@ -62,24 +70,23 @@ class AuthController extends Controller
     /**
      * Login User
      * @method Get
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function user(): JsonResponse
+    public function user()
     {
-        return response()->json([Auth::user(), 200]);
+        return response()->json([Auth::user(), Response::HTTP_OK]);
     }
 
     /**
      * Logout User
      * @method Post
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function logout(Request $request): JsonResponse
+    public function logout()
     {
         Auth::logout();
         return response()->json([
             'message' => 'Logged out successfully'
-        ], 200);
+        ], Response::HTTP_OK);
     }
 }

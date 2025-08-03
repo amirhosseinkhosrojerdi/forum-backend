@@ -9,6 +9,16 @@ class Channel extends Model
 {
     use HasFactory;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'name',
+        'slug',
+    ];
+
     public function threads(){
         return $this->hasMany(Thread::class);
     }
