@@ -23,7 +23,7 @@ class CreateThreadsTable extends Migration
             $table->foreignId('channel_id')->constrained()->onDelete('cascade');
             // Best Answer ID
             // $table->foreignId('answer_id')->constrained()->onDelete('cascade');
-            $table->unsignedBigInteger('best_answer_id');
+            $table->unsignedBigInteger('best_answer_id')->nullable();
             $table->timestamps();
         });
     }
@@ -38,7 +38,7 @@ class CreateThreadsTable extends Migration
         Schema::table('threads', function (Blueprint $table) {
             $table->dropForeign(['user_id']);
             $table->dropForeign(['channel_id']);
-            $table->dropForeign(['answer_id']);
+            $table->dropForeign(['best_answer_id']);
         });
         Schema::dropIfExists('threads');
     }

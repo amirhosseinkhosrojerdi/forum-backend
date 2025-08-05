@@ -1,6 +1,6 @@
 <?php
 
-use \App\Http\Controllers\API\V01\Auth\ChannelController;
+use \App\Http\Controllers\API\V01\Channel\ChannelController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('/channel')->group(function(){

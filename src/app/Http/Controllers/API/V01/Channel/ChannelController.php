@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API\V01\Auth;
+namespace App\Http\Controllers\API\V01\Channel;
 
 use App\Http\Controllers\Controller;
 use App\Repositories\ChannelRepository;
@@ -13,7 +13,6 @@ class ChannelController extends Controller
     /**
      * Get a list of channels.
      *
-     * @param Request $request
      * @return JsonResponse
      */
     public function getAllChannelsList()
