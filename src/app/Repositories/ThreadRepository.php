@@ -41,4 +41,36 @@ class ThreadRepository
             'user_id' => auth()->user()->id,
         ]);
     }
+
+    /**
+     * Edit a thread
+     * 
+     * @param Request $request
+     * @param Thread $thread
+     */
+    public function update(Request $request, $thread)
+    {
+        if(!$request->has('best_answer_id')){
+            $thread->update([
+                'title' => $request->input('title'),
+                'slug' => Str::slug($request->input('title')),
+                'content' => $request->input('content'),
+                'channel_id' => $request->input('channel_id'),
+            ]);
+        }else{
+            $thread->update([
+                'best_answer_id' => $request->input('best_answer_id')
+            ]);
+        }
+    }
+
+    /**
+     * Destroy a thread
+     * 
+     * @param Thread $thread
+     */
+    public function destroy($thread)
+    {
+        $thread->delete();
+    }
 }
