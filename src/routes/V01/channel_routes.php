@@ -3,6 +3,7 @@
 use \App\Http\Controllers\API\V01\Channel\ChannelController;
 use Illuminate\Support\Facades\Route;
 
+// Define routes for channels
 Route::prefix('/channel')->group(function(){
     Route::get('/all', [ChannelController::class, 'getAllChannelsList'])->name('channel.all');
     Route::middleware(['can:Manage Channels', 'auth:sanctum'])->group(function(){
