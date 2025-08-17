@@ -7,12 +7,23 @@ use App\Models\Thread;
 use App\Repositories\ThreadRepository;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\Response;
 
 class ThreadController extends Controller
 {
+    /**
+     * ThreadController constructor.
+     *
+     * This constructor applies the user_block middleware to all methods in this controller,
+     * except for the index and show methods.
+     */
+    public function __construct()
+    {
+        // Apply the user_block middleware to all methods in this controller
+        $this->middleware('user_block')->except(['index', 'show']);
+    }
+
     /**
      * Get a list of Threads.
      *

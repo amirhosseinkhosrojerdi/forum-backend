@@ -4,6 +4,7 @@ namespace Tests\Feature\API\V01\Channel;
 
 use App\Models\Channel;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
@@ -14,6 +15,8 @@ use function PHPUnit\Framework\assertEquals;
 
 class ChannelControllerTest extends TestCase
 {
+    use RefreshDatabase;
+    
     /**
      * Set up a roles and permissions for testing.
      *

@@ -35,11 +35,17 @@ class CreateThreadsTable extends Migration
      */
     public function down()
     {
-        Schema::table('threads', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
-            $table->dropForeign(['channel_id']);
-            $table->dropForeign(['best_answer_id']);
-        });
-        Schema::dropIfExists('threads');
+        // Check if the database driver is SQLite
+        if (Schema::getConnection()->getDriverName() === 'sqlite') {
+            // For SQLite, we can drop the table directly
+            Schema::dropIfExists('threads');
+        } else {
+            Schema::table('threads', function (Blueprint $table) {
+                $table->dropForeign(['user_id']);
+                $table->dropForeign(['channel_id']);
+                $table->dropForeign(['best_answer_id']);
+            });
+            Schema::dropIfExists('threads');
+        }
     }
 }

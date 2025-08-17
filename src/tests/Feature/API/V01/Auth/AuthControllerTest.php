@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\API\V01\Auth;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\Response;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;

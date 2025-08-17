@@ -11,6 +11,17 @@ class Thread extends Model
 
     protected $guarded = [];
 
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'user_id' => 'integer',
+        'channel_id' => 'integer',
+        'best_answer_id' => 'integer',
+    ];
+
     public function channel(){
         return $this->belongsTo(Channel::class);
     }

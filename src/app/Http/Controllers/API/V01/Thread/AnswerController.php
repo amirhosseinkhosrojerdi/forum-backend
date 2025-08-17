@@ -4,16 +4,32 @@ namespace App\Http\Controllers\API\V01\Thread;
 
 use App\Http\Controllers\Controller;
 use App\Models\Answer;
+use App\Models\Thread;
 use App\Models\User;
 use App\Repositories\AnswerRepository;
+use App\Notifications\NewReplySubmitted;
+use App\Repositories\SubscribeRepository;
+use App\Repositories\UserRepository;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Gate;
-use Laravel\Sanctum\Sanctum;
+use Illuminate\Support\Facades\Notification;
 use Symfony\Component\HttpFoundation\Response as HttpFoundationResponse;
 
-class AnswerControlle extends Controller
+class AnswerController extends Controller
 {
+    /**
+     * AnswerController constructor.
+     *
+     * This constructor applies the user_block middleware to all methods in this controller,
+     * except for the index and show methods.
+     */
+    public function __construct()
+    {
+        // Apply the user_block middleware to all methods in this controller
+        $this->middleware('user_block')->except(['index']);
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -36,9 +52,6 @@ class AnswerControlle extends Controller
      */
     public function store(Request $request)
     {
-        // Ensure the user is authenticated
-        Sanctum::actingAs(User::factory()->create());
-
         // Validate the request
         $this->validate($request, [
             'content' => 'required',
@@ -47,6 +60,21 @@ class AnswerControlle extends Controller
 
         // Store the answer using the repository
         resolve(AnswerRepository::class)->store($request);
+        // Get List of User Id Which Subscribed to the Thread Id
+        $notifiable_user_id = resolve(SubscribeRepository::class)->getNotifiableUsers($request->thread_id);
+        // Retrieve the users from the UserRepository
+        $notifiable_users = resolve(UserRepository::class)->find($notifiable_user_id);
+        // Send NewReplySubmitted notification to the users
+        Notification::send($notifiable_users, new NewReplySubmitted(Thread::find($request->thread_id)));
+
+        // Increment the score of the authenticated user
+        if(Thread::find($request->input('thread_id'))->user_id !== auth()->user()->id) {
+            $user = User::find(auth()->id());
+            if ($user) {
+                $user->score += 5;
+                $user->save();
+            }
+        }
 
         // Return a success response
         return response()->json([
@@ -67,7 +95,7 @@ class AnswerControlle extends Controller
         $this->validate($request, [
             'content' => 'required',
         ]);
-
+        
         // Check if the user is authorized to update the answer
         if(Gate::forUser(auth()->user())->allows('user-answer', $answer)) {
             // Update the answer using the repository
@@ -78,7 +106,7 @@ class AnswerControlle extends Controller
                 'message' => 'Answer updated successfully',
             ], HttpFoundationResponse::HTTP_OK);
         }
-
+        
         // If the user is not authorized, return a forbidden response
         return response()->json([
             'message' => 'Answer update failed: Unauthorized',
